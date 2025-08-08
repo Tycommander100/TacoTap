@@ -155,13 +155,13 @@
       <div class="hud">
         <div id="count" aria-live="polite">0</div>
         <div class="controls">
-          <button id="muteBtn" class="btn-muted" aria-pressed="false" aria-label="Toggle sound">🔊 Sound</button>
-          <button id="resetBtn" class="btn-danger">Reset</button>
+          <button id="muteBtn" type="button" class="btn-muted" aria-pressed="false" aria-label="Toggle sound">🔊 Sound</button>
+          <button id="resetBtn" type="button" class="btn-danger">Reset</button>
         </div>
       </div>
 
       <div class="taco-wrap">
-        <button id="tacoBtn" class="taco-btn" aria-label="Tap the taco to earn points">
+        <button id="tacoBtn" type="button" class="taco-btn" aria-label="Tap the taco to earn points">
           <img src="assets/542-5428736_taco-emoji-png-removebg-preview.png" alt="" onerror="this.replaceWith(document.createTextNode('🌮'));">
         </button>
       </div>
@@ -215,7 +215,8 @@
     function setSound(on) {
       soundOn = !!on;
       localStorage.setItem(SOUND_KEY, soundOn ? '1' : '0');
-      muteBtn.setAttribute('aria-pressed', String(!soundOn ? true : false));
+      // aria-pressed reflects "sound is ON"
+      muteBtn.setAttribute('aria-pressed', String(soundOn));
       muteBtn.textContent = soundOn ? '🔊 Sound' : '🔈 Muted';
     }
 
@@ -307,8 +308,14 @@
       tacoBtn.classList.add('bounce');
 
       // Sound (if available)
-      if (soundOn && crunch && crunch.play) {
-        try { crunch.currentTime = 0; crunch.play(); } catch {}
+      if (soundOn && crunch && typeof crunch.play === 'function') {
+        try {
+          crunch.currentTime = 0;
+          crunch.play();
+        } catch (e) {
+          // If play fails (policy or error), keep going silently
+          console.warn('Sound play failed:', e);
+        }
       }
 
       // Sync leaderboard immediately
@@ -338,8 +345,23 @@
       resetBtn.addEventListener('click', handleReset);
       muteBtn.addEventListener('click', () => setSound(!soundOn));
 
-      // If audio file missing, disable sound toggle gracefully
-      if (!crunch || !crunch.src) setSound(false);
+      // Gracefully handle audio availability
+      if (crunch) {
+        crunch.addEventListener('error', () => {
+          setSound(false);
+          muteBtn.disabled = true;
+          muteBtn.textContent = '🔇 Sound unavailable';
+        });
+        // If it can play, ensure the toggle reflects current state
+        crunch.addEventListener('canplaythrough', () => {
+          muteBtn.disabled = false;
+          setSound(localStorage.getItem(SOUND_KEY) !== '0');
+        }, { once: true });
+      } else {
+        setSound(false);
+        muteBtn.disabled = true;
+        muteBtn.textContent = '🔇 Sound unavailable';
+      }
 
       renderLeaderboard();
       startLeaderboardAutoRefresh();
@@ -347,4 +369,3 @@
   </script>
 </body>
 </html>
-
