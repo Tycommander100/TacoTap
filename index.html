@@ -73,7 +73,6 @@
     button:active { transform: translateY(0); box-shadow: none; }
     .btn-primary { background: var(--primary); color: #fff; border-color: #e1961a; }
     .btn-danger { background: #ef4444; color: #fff; border-color: #dc2626; }
-    .btn-muted { background: #f3f4f6; color: #111827; }
     .taco-wrap {
       display: grid;
       place-items: center;
@@ -82,6 +81,8 @@
     .taco-btn {
       width: 220px;
       height: 220px;
+      font-size: 8rem;
+      line-height: 1;
       border-radius: 50%;
       border: 3px solid var(--primary);
       background: radial-gradient(circle at 35% 35%, #fff7ed, #ffedd5);
@@ -90,12 +91,6 @@
       overflow: hidden;
       position: relative;
       transition: transform .06s ease;
-    }
-    .taco-btn img {
-      width: 100%;
-      height: auto;
-      user-select: none;
-      pointer-events: none;
     }
     .bounce {
       animation: bounce .18s ease;
@@ -111,7 +106,6 @@
       color: #6b7280;
       margin-bottom: 8px;
     }
-    /* Leaderboard */
     #leaderboard {
       margin-top: 16px;
       background: #fff8ef;
@@ -155,15 +149,12 @@
       <div class="hud">
         <div id="count" aria-live="polite">0</div>
         <div class="controls">
-          <button id="muteBtn" class="btn-muted" aria-pressed="false" aria-label="Toggle sound">🔊 Sound</button>
           <button id="resetBtn" class="btn-danger">Reset</button>
         </div>
       </div>
 
       <div class="taco-wrap">
-        <button id="tacoBtn" class="taco-btn" aria-label="Tap the taco to earn points">
-          <img src="taco.png" alt="" onerror="this.replaceWith(document.createTextNode('🌮'));">
-        </button>
+        <button id="tacoBtn" class="taco-btn" aria-label="Tap the taco to earn points">🌮</button>
       </div>
       <div id="message" role="status" aria-live="polite"></div>
 
@@ -176,28 +167,23 @@
     </div>
   </main>
 
-  <audio id="crunch" src="crunch.mp3" preload="auto"></audio>
-
   <script>
-    // ===== Game config
     const COUNT_KEY = 'tacoCount';
-    const SOUND_KEY = 'tacoSoundOn';
+    const CURRENT_SCORE_KEY = COUNT_KEY;
+    const LEADERBOARD_KEY = 'tacoLeaderboardV1';
+    const MAX_ENTRIES = 5;
+    const MY_NAME = 'You';
+    const REFRESH_MS = 3000;
     const CLICK_COOLDOWN_MS = 120;
 
-    // ===== Elements
     const countEl = document.getElementById('count');
     const msgEl = document.getElementById('message');
     const tacoBtn = document.getElementById('tacoBtn');
     const resetBtn = document.getElementById('resetBtn');
-    const muteBtn = document.getElementById('muteBtn');
-    const crunch = document.getElementById('crunch');
 
-    // ===== State
     let count = 0;
-    let soundOn = true;
     let lastClickAt = 0;
 
-    // ===== Helpers
     function loadInt(key, fallback = 0) {
       const raw = localStorage.getItem(key);
       const n = parseInt(raw, 10);
@@ -212,19 +198,6 @@
     function setMessage(text) {
       msgEl.textContent = text || '';
     }
-    function setSound(on) {
-      soundOn = !!on;
-      localStorage.setItem(SOUND_KEY, soundOn ? '1' : '0');
-      muteBtn.setAttribute('aria-pressed', String(!soundOn ? true : false));
-      muteBtn.textContent = soundOn ? '🔊 Sound' : '🔈 Muted';
-    }
-
-    // ===== Leaderboard (local, auto-updating)
-    const CURRENT_SCORE_KEY = COUNT_KEY;
-    const LEADERBOARD_KEY   = 'tacoLeaderboardV1';
-    const MAX_ENTRIES       = 5;
-    const MY_NAME           = 'You';
-    const REFRESH_MS        = 3000;
 
     function getCurrentScore() {
       return loadInt(CURRENT_SCORE_KEY, 0);
@@ -237,10 +210,7 @@
       localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(lb));
     }
     function sortAndTrim(lb) {
-      lb.sort((a, b) => {
-        if (b.score !== a.score) return b.score - a.score;
-        return a.at - b.at; // older wins ties
-      });
+      lb.sort((a, b) => b.score - a.score || a.at - b.at);
       return lb.slice(0, MAX_ENTRIES);
     }
     function upsertMyScore(score) {
@@ -276,74 +246,5 @@
         updated.textContent = `Updated ${ts}`;
       }
     }
-    let leaderboardInterval = null;
-    function startLeaderboardAutoRefresh() {
-      upsertMyScore(getCurrentScore());
-      clearInterval(leaderboardInterval);
-      leaderboardInterval = setInterval(() => {
-        upsertMyScore(getCurrentScore());
-      }, REFRESH_MS);
-    }
-    function clearLeaderboard() {
-      localStorage.removeItem(LEADERBOARD_KEY);
-      renderLeaderboard([]);
-    }
 
-    // ===== Game logic
-    function handleClick() {
-      const now = performance.now();
-      if (now - lastClickAt < CLICK_COOLDOWN_MS) return;
-      lastClickAt = now;
-
-      count += 1;
-      saveInt(COUNT_KEY, count);
-      updateUI();
-      setMessage('Nice crunch!');
-
-      // Animate
-      tacoBtn.classList.remove('bounce');
-      // force reflow to restart animation
-      void tacoBtn.offsetWidth;
-      tacoBtn.classList.add('bounce');
-
-      // Sound (if available)
-      if (soundOn && crunch && crunch.play) {
-        try { crunch.currentTime = 0; crunch.play(); } catch {}
-      }
-
-      // Sync leaderboard immediately
-      upsertMyScore(count);
-    }
-
-    function handleReset() {
-      count = 0;
-      saveInt(COUNT_KEY, count);
-      updateUI();
-      setMessage('Back to zero. Fresh start!');
-      // Option A: keep leaderboard (but refresh "You" entry)
-      upsertMyScore(count);
-      // Option B: also wipe leaderboard:
-      // clearLeaderboard();
-    }
-
-    // ===== Wire up
-    document.addEventListener('DOMContentLoaded', () => {
-      count = loadInt(COUNT_KEY, 0);
-      updateUI();
-
-      const savedSound = localStorage.getItem(SOUND_KEY);
-      setSound(savedSound !== '0');
-
-      tacoBtn.addEventListener('click', handleClick);
-      resetBtn.addEventListener('click', handleReset);
-      muteBtn.addEventListener('click', () => setSound(!soundOn));
-
-      // If audio file missing, disable sound toggle gracefully
-      if (!crunch || !crunch.src) setSound(false);
-
-      renderLeaderboard();
-      startLeaderboardAutoRefresh();
-    });
-  </script>
-</body>
-</html>
+    
