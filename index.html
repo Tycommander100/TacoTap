@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>TacoTap Game</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Taco Tap</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>TacoTap 🌮</h1>
-  <p>Tap the taco to earn points and climb the leaderboard!</p>
+  <div class="hud">
+    <div id="count" aria-live="polite">0</div>
+    <div class="controls">
+      <button id="resetBtn" class="btn-danger">Reset</button>
+    </div>
+  </div>
 
   <div class="taco-wrap">
     <button id="tacoBtn" class="taco-btn" aria-label="Tap the taco to earn points">
@@ -15,41 +20,60 @@
     </button>
   </div>
 
-  <audio id="tapSound" src="synthesize.mp3" preload="auto"></audio>
-
-  <h2>Score: <span id="score">0</span></h2>
-
-  <h2>Leaderboard</h2>
-  <ol id="leaderboard"></ol>
+  <audio id="crunch" src="crunch.mp3" preload="auto"></audio>
 
   <script>
-    let score = 0;
-    const scoreDisplay = document.getElementById("score");
-    const tacoBtn = document.getElementById("tacoBtn");
-    const tapSound = document.getElementById("tapSound");
-    const leaderboard = document.getElementById("leaderboard");
+    const tacoBtn = document.getElementById('tacoBtn');
+    const countEl = document.getElementById('count');
+    const crunch = document.getElementById('crunch');
+    const resetBtn = document.getElementById('resetBtn');
+    const COUNT_KEY = 'taco-count';
+    let count = parseInt(localStorage.getItem(COUNT_KEY)) || 0;
 
-    tacoBtn.addEventListener("click", () => {
-      score++;
-      scoreDisplay.textContent = score;
-      tapSound.play();
-      bounceTaco();
-      updateLeaderboard();
+    function updateUI() {
+      countEl.textContent = count;
+    }
+
+    function setMessage(msg) {
+      console.log(msg); // Optional: Display feedback in the console
+    }
+
+    function upsertMyScore(newScore) {
+      console.log('Score updated:', newScore); // Stub for future leaderboard
+    }
+
+    function handleClick() {
+      count += 1;
+      localStorage.setItem(COUNT_KEY, count);
+      updateUI();
+      setMessage('Nice crunch!');
+
+      tacoBtn.classList.remove('bounce');
+      void tacoBtn.offsetWidth;
+      tacoBtn.classList.add('bounce');
+
+      if (crunch && typeof crunch.play === 'function') {
+        try {
+          crunch.currentTime = 0;
+          crunch.play();
+        } catch (e) {
+          console.warn('Sound play failed:', e);
+        }
+      }
+
+      upsertMyScore(count);
+    }
+
+    tacoBtn.addEventListener('click', handleClick);
+
+    resetBtn.addEventListener('click', () => {
+      count = 0;
+      localStorage.setItem(COUNT_KEY, count);
+      updateUI();
+      setMessage('Score reset!');
     });
 
-    function bounceTaco() {
-      tacoBtn.classList.add("bounce");
-      setTimeout(() => tacoBtn.classList.remove("bounce"), 300);
-    }
-
-    function updateLeaderboard() {
-      leaderboard.innerHTML = "";
-      for (let i = 1; i <= 5; i++) {
-        const li = document.createElement("li");
-        li.textContent = `Player ${i}: ${score * i} pts`;
-        leaderboard.appendChild(li);
-      }
-    }
+    updateUI();
   </script>
 </body>
 </html>
