@@ -1,371 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TacoTap 🌮</title>
-  <style>
-    :root {
-      --bg: #fff8ef;
-      --card: #ffffff;
-      --primary: #f59e0b;
-      --accent: #10b981;
-      --border: #f2c27b;
-      --text: #1f2937;
-    }
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
-    }
-    .container {
-      max-width: 700px;
-      margin: 32px auto;
-      padding: 0 16px;
-    }
-    h1 {
-      margin: 0 0 12px;
-      font-size: 2rem;
-      line-height: 1.2;
-    }
-    .card {
-      background: var(--card);
-      border: 2px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-      box-shadow: 0 4px 0 rgba(0,0,0,0.06);
-    }
-    .hud {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      margin: 12px 0 16px;
-    }
-    #count {
-      font: 700 2.2rem/1 monospace;
-      padding: 6px 12px;
-      background: #fff0d9;
-      border-radius: 8px;
-      min-width: 120px;
-      text-align: center;
-    }
-    .controls {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    button {
-      cursor: pointer;
-      border: 2px solid var(--border);
-      background: #fff;
-      color: var(--text);
-      padding: 8px 12px;
-      border-radius: 10px;
-      font-weight: 600;
-      transition: transform .05s ease, box-shadow .1s ease, background .2s ease;
-      box-shadow: 0 3px 0 rgba(0,0,0,0.06);
-    }
-    button:hover { transform: translateY(-1px); }
-    button:active { transform: translateY(0); box-shadow: none; }
-    .btn-primary { background: var(--primary); color: #fff; border-color: #e1961a; }
-    .btn-danger { background: #ef4444; color: #fff; border-color: #dc2626; }
-    .btn-muted { background: #f3f4f6; color: #111827; }
-    .taco-wrap {
-      display: grid;
-      place-items: center;
-      margin: 12px 0 8px;
-    }
-    .taco-btn {
-      width: 220px;
-      height: 220px;
-      border-radius: 50%;
-      border: 3px solid var(--primary);
-      background: radial-gradient(circle at 35% 35%, #fff7ed, #ffedd5);
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      position: relative;
-      transition: transform .06s ease;
-    }
-    .taco-btn img {
-      width: 74%;
-      height: auto;
-      user-select: none;
-      pointer-events: none;
-    }
-    .bounce {
-      animation: bounce .18s ease;
-    }
-    @keyframes bounce {
-      0% { transform: scale(1); }
-      50% { transform: scale(0.95); }
-      100% { transform: scale(1); }
-    }
-    #message {
-      min-height: 1.2em;
-      text-align: center;
-      color: #6b7280;
-      margin-bottom: 8px;
-    }
-    /* Leaderboard */
-    #leaderboard {
-      margin-top: 16px;
-      background: #fff8ef;
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 14px;
-    }
-    #leaderboard h2 {
-      margin: 0 0 8px;
-      font-size: 1.2rem;
-    }
-    #leaderboard-list {
-      margin: 0;
-      padding-left: 1.2rem;
-    }
-    #leaderboard-list li {
-      margin: 4px 0;
-      line-height: 1.3;
-    }
-    .leaderboard-highlight {
-      background: #fff0d9;
-      border-radius: 6px;
-      padding: 2px 6px;
-    }
-    #leaderboard-updated {
-      font-size: 0.9rem;
-      color: #666;
-      margin-top: 4px;
-    }
-    .footnote {
-      margin-top: 8px;
-      font-size: .9rem;
-      color: #6b7280;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>TacoTap Game</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="container">
-    <h1>TacoTap 🌮</h1>
-    <div class="card">
-      <div class="hud">
-        <div id="count" aria-live="polite">0</div>
-        <div class="controls">
-          <button id="muteBtn" type="button" class="btn-muted" aria-pressed="false" aria-label="Toggle sound">🔊 Sound</button>
-          <button id="resetBtn" type="button" class="btn-danger">Reset</button>
-        </div>
-      </div>
+  <h1>TacoTap 🌮</h1>
+  <p>Tap the taco to earn points and climb the leaderboard!</p>
 
-      <div class="taco-wrap">
-        <button id="tacoBtn" type="button" class="taco-btn" aria-label="Tap the taco to earn points">
-          <img src="assets/542-5428736_taco-emoji-png-removebg-preview.png" alt="" onerror="this.replaceWith(document.createTextNode('🌮'));">
-        </button>
-      </div>
-      <div id="message" role="status" aria-live="polite"></div>
+  <div class="taco-wrap">
+    <button id="tacoBtn" class="taco-btn" aria-label="Tap the taco to earn points">
+      <img src="542-5428736_taco-emoji-png-removebg-preview.png" alt="" onerror="this.replaceWith(document.createTextNode('🌮'));">
+    </button>
+  </div>
 
-      <section id="leaderboard" aria-labelledby="leaderboard-title">
-        <h2 id="leaderboard-title">Leaderboard</h2>
-        <ol id="leaderboard-list"></ol>
-        <div id="leaderboard-updated" aria-live="polite"></div>
-        <div class="footnote">Local to this device. Auto-updates every few seconds.</div>
-      </section>
-    </div>
-  </main>
+  <audio id="tapSound" src="synthesize.mp3" preload="auto"></audio>
 
-  <audio id="crunch" src="synthesize.mp3" preload="auto"></audio>
+  <h2>Score: <span id="score">0</span></h2>
+
+  <h2>Leaderboard</h2>
+  <ol id="leaderboard"></ol>
 
   <script>
-    // ===== Game config
-    const COUNT_KEY = 'tacoCount';
-    const SOUND_KEY = 'tacoSoundOn';
-    const CLICK_COOLDOWN_MS = 120;
+    let score = 0;
+    const scoreDisplay = document.getElementById("score");
+    const tacoBtn = document.getElementById("tacoBtn");
+    const tapSound = document.getElementById("tapSound");
+    const leaderboard = document.getElementById("leaderboard");
 
-    // ===== Elements
-    const countEl = document.getElementById('count');
-    const msgEl = document.getElementById('message');
-    const tacoBtn = document.getElementById('tacoBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const muteBtn = document.getElementById('muteBtn');
-    const crunch = document.getElementById('crunch');
-
-    // ===== State
-    let count = 0;
-    let soundOn = true;
-    let lastClickAt = 0;
-
-    // ===== Helpers
-    function loadInt(key, fallback = 0) {
-      const raw = localStorage.getItem(key);
-      const n = parseInt(raw, 10);
-      return Number.isFinite(n) ? n : fallback;
-    }
-    function saveInt(key, n) {
-      localStorage.setItem(key, String(n));
-    }
-    function updateUI() {
-      countEl.textContent = count.toLocaleString();
-    }
-    function setMessage(text) {
-      msgEl.textContent = text || '';
-    }
-    function setSound(on) {
-      soundOn = !!on;
-      localStorage.setItem(SOUND_KEY, soundOn ? '1' : '0');
-      // aria-pressed reflects "sound is ON"
-      muteBtn.setAttribute('aria-pressed', String(soundOn));
-      muteBtn.textContent = soundOn ? '🔊 Sound' : '🔈 Muted';
-    }
-
-    // ===== Leaderboard (local, auto-updating)
-    const CURRENT_SCORE_KEY = COUNT_KEY;
-    const LEADERBOARD_KEY   = 'tacoLeaderboardV1';
-    const MAX_ENTRIES       = 5;
-    const MY_NAME           = 'You';
-    const REFRESH_MS        = 3000;
-
-    function getCurrentScore() {
-      return loadInt(CURRENT_SCORE_KEY, 0);
-    }
-    function loadLeaderboard() {
-      try { return JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || '[]'); }
-      catch { return []; }
-    }
-    function saveLeaderboard(lb) {
-      localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(lb));
-    }
-    function sortAndTrim(lb) {
-      lb.sort((a, b) => {
-        if (b.score !== a.score) return b.score - a.score;
-        return a.at - b.at; // older wins ties
-      });
-      return lb.slice(0, MAX_ENTRIES);
-    }
-    function upsertMyScore(score) {
-      let lb = loadLeaderboard();
-      const idx = lb.findIndex(e => e.name === MY_NAME);
-      if (idx >= 0) {
-        if (score > lb[idx].score) {
-          lb[idx].score = score;
-          lb[idx].at = Date.now();
-        }
-      } else {
-        lb.push({ name: MY_NAME, score, at: Date.now() });
-      }
-      lb = sortAndTrim(lb);
-      saveLeaderboard(lb);
-      renderLeaderboard(lb);
-    }
-    function renderLeaderboard(lb = loadLeaderboard()) {
-      const list = document.getElementById('leaderboard-list');
-      const updated = document.getElementById('leaderboard-updated');
-      if (!list) return;
-      list.innerHTML = '';
-      lb.forEach((entry, i) => {
-        const li = document.createElement('li');
-        const isMe = entry.name === MY_NAME;
-        li.innerHTML = `<span class="${isMe ? 'leaderboard-highlight' : ''}">
-          ${i + 1}. ${entry.name} — ${entry.score.toLocaleString()}
-        </span>`;
-        list.appendChild(li);
-      });
-      if (updated) {
-        const ts = new Date().toLocaleTimeString();
-        updated.textContent = `Updated ${ts}`;
-      }
-    }
-    let leaderboardInterval = null;
-    function startLeaderboardAutoRefresh() {
-      upsertMyScore(getCurrentScore());
-      clearInterval(leaderboardInterval);
-      leaderboardInterval = setInterval(() => {
-        upsertMyScore(getCurrentScore());
-      }, REFRESH_MS);
-    }
-    function clearLeaderboard() {
-      localStorage.removeItem(LEADERBOARD_KEY);
-      renderLeaderboard([]);
-    }
-
-    // ===== Game logic
-    function handleClick() {
-      const now = performance.now();
-      if (now - lastClickAt < CLICK_COOLDOWN_MS) return;
-      lastClickAt = now;
-
-      count += 1;
-      saveInt(COUNT_KEY, count);
-      updateUI();
-      setMessage('Nice crunch!');
-
-      // Animate
-      tacoBtn.classList.remove('bounce');
-      // force reflow to restart animation
-      void tacoBtn.offsetWidth;
-      tacoBtn.classList.add('bounce');
-
-      // Sound (if available)
-      if (soundOn && crunch && typeof crunch.play === 'function') {
-        try {
-          crunch.currentTime = 0;
-          crunch.play();
-        } catch (e) {
-          // If play fails (policy or error), keep going silently
-          console.warn('Sound play failed:', e);
-        }
-      }
-
-      // Sync leaderboard immediately
-      upsertMyScore(count);
-    }
-
-    function handleReset() {
-      count = 0;
-      saveInt(COUNT_KEY, count);
-      updateUI();
-      setMessage('Back to zero. Fresh start!');
-      // Option A: keep leaderboard (but refresh "You" entry)
-      upsertMyScore(count);
-      // Option B: also wipe leaderboard:
-      // clearLeaderboard();
-    }
-
-    // ===== Wire up
-    document.addEventListener('DOMContentLoaded', () => {
-      count = loadInt(COUNT_KEY, 0);
-      updateUI();
-
-      const savedSound = localStorage.getItem(SOUND_KEY);
-      setSound(savedSound !== '0');
-
-      tacoBtn.addEventListener('click', handleClick);
-      resetBtn.addEventListener('click', handleReset);
-      muteBtn.addEventListener('click', () => setSound(!soundOn));
-
-      // Gracefully handle audio availability
-      if (crunch) {
-        crunch.addEventListener('error', () => {
-          setSound(false);
-          muteBtn.disabled = true;
-          muteBtn.textContent = '🔇 Sound unavailable';
-        });
-        // If it can play, ensure the toggle reflects current state
-        crunch.addEventListener('canplaythrough', () => {
-          muteBtn.disabled = false;
-          setSound(localStorage.getItem(SOUND_KEY) !== '0');
-        }, { once: true });
-      } else {
-        setSound(false);
-        muteBtn.disabled = true;
-        muteBtn.textContent = '🔇 Sound unavailable';
-      }
-
-      renderLeaderboard();
-      startLeaderboardAutoRefresh();
+    tacoBtn.addEventListener("click", () => {
+      score++;
+      scoreDisplay.textContent = score;
+      tapSound.play();
+      bounceTaco();
+      updateLeaderboard();
     });
+
+    function bounceTaco() {
+      tacoBtn.classList.add("bounce");
+      setTimeout(() => tacoBtn.classList.remove("bounce"), 300);
+    }
+
+    function updateLeaderboard() {
+      leaderboard.innerHTML = "";
+      for (let i = 1; i <= 5; i++) {
+        const li = document.createElement("li");
+        li.textContent = `Player ${i}: ${score * i} pts`;
+        leaderboard.appendChild(li);
+      }
+    }
   </script>
 </body>
 </html>
