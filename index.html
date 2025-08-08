@@ -11,6 +11,7 @@
     <div id="count" aria-live="polite">0</div>
     <div class="controls">
       <button id="resetBtn" class="btn-danger">Reset</button>
+      <button id="soundBtn" class="btn-sound" aria-pressed="true" aria-label="Toggle sound">🔊 Sound</button>
     </div>
   </div>
 
@@ -27,19 +28,21 @@
     const countEl = document.getElementById('count');
     const crunch = document.getElementById('crunch');
     const resetBtn = document.getElementById('resetBtn');
+    const soundBtn = document.getElementById('soundBtn');
     const COUNT_KEY = 'taco-count';
     let count = parseInt(localStorage.getItem(COUNT_KEY)) || 0;
+    let soundOn = true;
 
     function updateUI() {
       countEl.textContent = count;
     }
 
     function setMessage(msg) {
-      console.log(msg); // Optional: Display feedback in the console
+      console.log(msg);
     }
 
     function upsertMyScore(newScore) {
-      console.log('Score updated:', newScore); // Stub for future leaderboard
+      console.log('Score updated:', newScore);
     }
 
     function handleClick() {
@@ -52,7 +55,7 @@
       void tacoBtn.offsetWidth;
       tacoBtn.classList.add('bounce');
 
-      if (crunch && typeof crunch.play === 'function') {
+      if (soundOn && crunch && typeof crunch.play === 'function') {
         try {
           crunch.currentTime = 0;
           crunch.play();
@@ -71,6 +74,13 @@
       localStorage.setItem(COUNT_KEY, count);
       updateUI();
       setMessage('Score reset!');
+    });
+
+    soundBtn.addEventListener('click', () => {
+      soundOn = !soundOn;
+      soundBtn.setAttribute('aria-pressed', soundOn);
+      soundBtn.textContent = soundOn ? '🔊 Sound' : '🔇 Muted';
+      setMessage(soundOn ? 'Sound on' : 'Sound off');
     });
 
     updateUI();
