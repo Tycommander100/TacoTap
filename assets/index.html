@@ -162,7 +162,7 @@
 
       <div class="taco-wrap">
         <button id="tacoBtn" class="taco-btn" aria-label="Tap the taco to earn points">
-          <img src="taco.png" alt="" onerror="this.replaceWith(document.createTextNode('🌮'));">
+          <img src="542-5428736_taco-emoji-png-removebg-preview.png" alt="" onerror="this.replaceWith(document.createTextNode('🌮'));">
         </button>
       </div>
       <div id="message" role="status" aria-live="polite"></div>
@@ -176,7 +176,7 @@
     </div>
   </main>
 
-  <audio id="crunch" src="crunch.mp3" preload="auto"></audio>
+  <audio id="synthesize" src="synthesize.mp3" preload="auto"></audio>
 
   <script>
     // ===== Game config
@@ -190,7 +190,7 @@
     const tacoBtn = document.getElementById('tacoBtn');
     const resetBtn = document.getElementById('resetBtn');
     const muteBtn = document.getElementById('muteBtn');
-    const crunch = document.getElementById('crunch');
+    const synthesize = document.getElementById('synthesize');
 
     // ===== State
     let count = 0;
@@ -298,7 +298,7 @@
       count += 1;
       saveInt(COUNT_KEY, count);
       updateUI();
-      setMessage('Nice crunch!');
+      setMessage('Nice synthesize!');
 
       // Animate
       tacoBtn.classList.remove('bounce');
@@ -307,8 +307,8 @@
       tacoBtn.classList.add('bounce');
 
       // Sound (if available)
-      if (soundOn && crunch && crunch.play) {
-        try { crunch.currentTime = 0; crunch.play(); } catch {}
+      if (soundOn && synthesize && synthesize.play) {
+        try { synthesize.currentTime = 0; synthesize.play(); } catch {}
       }
 
       // Sync leaderboard immediately
@@ -339,7 +339,7 @@
       muteBtn.addEventListener('click', () => setSound(!soundOn));
 
       // If audio file missing, disable sound toggle gracefully
-      if (!crunch || !crunch.src) setSound(false);
+      if (!synthesize || !synthesize.src) setSound(false);
 
       renderLeaderboard();
       startLeaderboardAutoRefresh();
