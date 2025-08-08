@@ -5,24 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>TacoTap 🌮</title>
   <style>
-    /* ... existing styles ... */
-    .taco-btn {
-      width: 220px;
-      height: 220px;
-      border-radius: 50%;
-      border: 3px solid var(--primary);
-      background: radial-gradient(circle at 35% 35%, #fff7ed, #ffedd5);
-      font-size: 7rem;
-      line-height: 1;
-      display: grid;
-      place-items: center;
-      transition: transform .06s ease;
-      touch-action: manipulation; /* ✅ Prevent double-tap zoom */
-    }
-    /* ... rest of your styles ... */
-  </style>
-</head>
-
     :root {
       --bg: #fff8ef;
       --card: #ffffff;
@@ -106,6 +88,7 @@
       display: grid;
       place-items: center;
       transition: transform .06s ease;
+      touch-action: manipulation;
     }
     .bounce {
       animation: bounce .2s ease;
@@ -185,7 +168,6 @@
 
   <script>
     const COUNT_KEY = 'tacoCount';
-    const CURRENT_SCORE_KEY = COUNT_KEY;
     const LEADERBOARD_KEY = 'tacoLeaderboardV1';
     const MAX_ENTRIES = 5;
     const MY_NAME = 'You';
@@ -197,8 +179,33 @@
     const tacoBtn = document.getElementById('tacoBtn');
     const resetBtn = document.getElementById('resetBtn');
 
-    let count = 0;
+    let count = loadInt(COUNT_KEY, 0);
     let lastClickAt = 0;
+
+    updateUI();
+    renderLeaderboard();
+
+    tacoBtn.addEventListener('click', () => {
+      const now = Date.now();
+      if (now - lastClickAt < CLICK_COOLDOWN_MS) return;
+      lastClickAt = now;
+      count++;
+      saveInt(COUNT_KEY, count);
+      updateUI();
+      upsertMyScore(count);
+      tacoBtn.classList.add('bounce');
+      setTimeout(() => tacoBtn.classList.remove('bounce'), 200);
+    });
+
+    resetBtn.addEventListener('click', () => {
+      count = 0;
+      saveInt(COUNT_KEY, count);
+      updateUI();
+      setMessage('Reset! 🌮');
+      upsertMyScore(count);
+    });
+
+    setInterval(renderLeaderboard, REFRESH_MS);
 
     function loadInt(key, fallback = 0) {
       const raw = localStorage.getItem(key);
@@ -218,13 +225,12 @@
       msgEl.textContent = text || '';
     }
 
-    function getCurrentScore() {
-      return loadInt(CURRENT_SCORE_KEY, 0);
-    }
-
     function loadLeaderboard() {
-      try { return JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || '[]'); }
-      catch { return []; }
+      try {
+        return JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || '[]');
+      } catch {
+        return [];
+      }
     }
 
     function saveLeaderboard(lb) {
@@ -244,20 +250,5 @@
           lb[idx].score = score;
           lb[idx].at = Date.now();
         }
-      } else {
-        lb.push({ name: MY_NAME, score, at: Date.now() });
-      }
-      lb = sortAndTrim(lb);
-      saveLeaderboard(lb);
-      renderLeaderboard(lb);
-    }
-
-    function renderLeaderboard(lb = loadLeaderboard()) {
-      const list = document.getElementById('leaderboard-list');
-      const updated = document.getElementById('leaderboard-updated');
-      list.innerHTML = '';
-      lb.forEach((entry, i) => {
-        const li = document.createElement('li');
-        const isMe = entry.name === MY_NAME;
-        li.innerHTML = `<span class="${isMe ? 'leader
-                                       
+      } else
+        
