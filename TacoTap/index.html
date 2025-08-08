@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TacoTap Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>TacoTap 🌮</h1>
+  <p>Tap the taco to earn points and climb the leaderboard!</p>
+
+  <div class="taco-wrap">
+    <button id="tacoBtn" class="taco-btn" aria-label="Tap the taco to earn points">
+      <img src="542-5428736_taco-emoji-png-removebg-preview.png" alt="" onerror="this.replaceWith(document.createTextNode('🌮'));">
+    </button>
+  </div>
+
+  <audio id="tapSound" src="synthesize.mp3" preload="auto"></audio>
+
+  <h2>Score: <span id="score">0</span></h2>
+
+  <h2>Leaderboard</h2>
+  <ol id="leaderboard"></ol>
+
+  <script>
+    let score = 0;
+    const scoreDisplay = document.getElementById("score");
+    const tacoBtn = document.getElementById("tacoBtn");
+    const tapSound = document.getElementById("tapSound");
+    const leaderboard = document.getElementById("leaderboard");
+
+    tacoBtn.addEventListener("click", () => {
+      score++;
+      scoreDisplay.textContent = score;
+      tapSound.play();
+      bounceTaco();
+      updateLeaderboard();
+    });
+
+    function bounceTaco() {
+      tacoBtn.classList.add("bounce");
+      setTimeout(() => tacoBtn.classList.remove("bounce"), 300);
+    }
+
+    function updateLeaderboard() {
+      leaderboard.innerHTML = "";
+      for (let i = 1; i <= 5; i++) {
+        const li = document.createElement("li");
+        li.textContent = `Player ${i}: ${score * i} pts`;
+        leaderboard.appendChild(li);
+      }
+    }
+  </script>
+</body>
+</html>
