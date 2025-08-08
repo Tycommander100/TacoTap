@@ -101,15 +101,33 @@
   const tacoBtn = document.querySelector(".taco-btn");
   const countDisplay = document.getElementById("count");
 
-  let count = 0;
+  const COUNT_KEY = "tacoCount";
+  let count = loadCount();
+
+  updateUI();
 
   tacoBtn.addEventListener("click", () => {
     count++;
-    countDisplay.textContent = count;
-    // Optional bounce effect
+    saveCount(count);
+    updateUI();
     tacoBtn.classList.add("bounce");
     setTimeout(() => tacoBtn.classList.remove("bounce"), 200);
   });
+
+  function loadCount() {
+    const saved = localStorage.getItem(COUNT_KEY);
+    const n = parseInt(saved, 10);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function saveCount(n) {
+    localStorage.setItem(COUNT_KEY, String(n));
+  }
+
+  function updateUI() {
+    countDisplay.textContent = count;
+  }
 </script>
+
 </body>
 </html>
