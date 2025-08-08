@@ -90,7 +90,7 @@
       transition: transform .06s ease;
     }
     .bounce {
-      animation: bounce .18s ease;
+      animation: bounce .2s ease;
     }
     @keyframes bounce {
       0% { transform: scale(1); }
@@ -241,10 +241,5 @@
       lb.forEach((entry, i) => {
         const li = document.createElement('li');
         const isMe = entry.name === MY_NAME;
-        li.innerHTML = `<span class="${isMe ? 'leaderboard-highlight' : ''}">
-          ${i + 1}. ${entry.name} — ${entry.score.toLocaleString()}
-        </span>`;
-        list.appendChild(li);
-      });
-      if (updated) {
-        updated.textContent = `Updated ${
+        li.innerHTML = `<span class="${isMe ? 'leader
+                                       
