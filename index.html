@@ -97,5 +97,19 @@
       </section>
     </div>
   </main>
+  <script>
+  const tacoBtn = document.querySelector(".taco-btn");
+  const countDisplay = document.getElementById("count");
+
+  let count = 0;
+
+  tacoBtn.addEventListener("click", () => {
+    count++;
+    countDisplay.textContent = count;
+    // Optional bounce effect
+    tacoBtn.classList.add("bounce");
+    setTimeout(() => tacoBtn.classList.remove("bounce"), 200);
+  });
+</script>
 </body>
 </html>
